@@ -1,12 +1,14 @@
 import tdameritrade as td
+from tdameritrade.client import TDClient
 import os
 import json
+
 
 class C_TDameritrade:
     def __init__(self):
         self.client_id = os.getenv('TDAMERITRADE_CLIENT_ID')
-        self.account_id = os.getenv('TDAMERITRADE_ACCOUNT_ID')
         self.refresh_token = os.getenv('TDAMERITRADE_REFRESH_TOKEN')
+        self.account_id = os.getenv('TDAMERITRADE_ACCOUNT_ID')
 
         tdclient = td.TDClient(self.client_id, self.refresh_token, self.account_id)
 
