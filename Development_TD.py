@@ -8,9 +8,37 @@ from flask_app import db
 client_id_ = os.getenv('TDAMERITRADE_CLIENT_ID', default='FGCT7QNS3OXYT0R6DZQIDVIAYE3KFQA3')
 account_id_ = os.getenv('TDAMERITRADE_ACCOUNT_ID', default='493918836')
 refresh_token_ = os.getenv('TDAMERITRADE_REFRESH_TOKEN', default='il0eggPn3999znfXxkJKBwkLsawtEUb1Uub2Oma6FjaRY5+a/CVEPybOC/GAmTwDx9nOGI+qfZDKU1yit4qc56R9Keolj0zINrL0LdgFM3unmdwudyRCwL4YG33iqYxZcRY3FnRj8HwkVVrVUtoDsTfAbycsVY6qHpm1/MRrJganGTEzurt2Yu63/cRdRre2n7Yr+hZQWsyVivByHkM3zj6m8I50Hrk5TSznUDN1k/vZLkqpUNFRmHOtpDRddJN+oVEVdoqytRF0MGW+TMka+G9i1n/fiUZzytEUM7pC02aOd5cR/rAf/FwuN0MQeVHt4kd06t8C5kskq0cPzm4Z8g3zLYR0D3de4O3PQXjS9CLfRdoFbeD+j7FXb30yY703Zx+9/WjN02oUSMtblqrgvJn9SYpPtltUDILhbe3RcdOwWGrydz06I0WyHBN100MQuG4LYrgoVi/JHHvl/UhFrpcXcpEUIqNb7ESHW+9px9bnFVCAtr9oBbTpP0eJ8SUsUNI5OkH2/x+zq4v1fiqasYeeLbwhhuOcFXz8WYHPGdokcQ7oB8aoybS5Fg6V0QlJqhzx/KanbWcQKhTPSjytbykt5UKBKwgmC6lIPqaTmbHstHEGW0S3cyhha1dRkqHbc7XELj54I8obKHbhB76MoOtL6rjDExiuExhQh+8f6n7H/OkH7CzPbx8vXeYBmdUq7ejszxcNiJIE0QaDDH7qtsr8Ah4e6yTfxm2GaEuc1gNOcoVK/c29e8XGf2lrC8sLoR/9B+i+qRdoy4bRMtkadsdmn/YFsexzL46Ohk4cvA+yu/+FRq++H77Zi5d/1rQVWy5o4y1BpS/WYf3Q0uaHmmZzgznMB4qemzosMz2fVboi5MLaYX62fqtZIbe8WG+4xnNrQG8+0gc=212FD3x19z9sWBHDJACbC00B75E')
-access_token_ = os.getenv('TDAMERITRADE_ACCESS_TOKEN', default='OCWzKHKURmf896wdTWJIAWQcEiu4n+ovf9QXU+ZXA6VVIOubMDkIy65707fnVk7xUZ+/bvfR+mmFpDrkAarvmI9nuxelZql5p7V2weXmuMAaHX9dIBmQamHSxFx6FUhgs3/jjRX/dgoHVtAvCXnRm4Do2Y/k/Ck74cJDsJOr99pNy9WfjrytxPElVKMszGdnk+xCj1r2/ywGrOPgDQBzbP/UxePrzSeTWKcvp4k+hqYgbHOqtBJStL5VPNP+wkKDnTzCdFIy4mYRGMmZ6YcPdyx/oO1qwmFnW1poFI/s7Xs0a+RZT9XYm6aZbfNf5z9MHmJS0LUkRN9/9gCA7ORXxqS8UqViCTzsj37Hbad5tQGJwt81F1vjhtq279L5SSUigJUvf+srYJ9atl5y5HQ4aieQReTg9T2IkApphO065rC5cAmexLPciFkFAdJjNnNZWo4PpofEVwqUNmu+FAFlLIMy5zVnSDJnuZG/VQy+9pT/ZhB7rvxJdwHIHN0oFaAzQ0vekSYxX5r0Xxnvefsy2PHYX8dp4Ik5dmV2+aH3JLg0pJVYM100MQuG4LYrgoVi/JHHvltK192SXHGCwyPoEH2sjCYvKr4T6ejP4w2dUV5b7U1CCelGpo3T4Aciq70m7UWjE42iLly5bIsl5xyqZrZHl0RSxyDqmw+SLr/jAUokvfuZRg+23ViGy5+YuOfSfrHb45n6Hnhy1ADijNI0RH6hK/pveI2WH9Ru9vfS5BuIPJFRO3JqL0RKXotw7bNtauGcJenOthazDbNsMOQKHnyLgYy1VFR9tGAp67kAbmyG6KPnb7Oe6QbiiJ16ItXGIy21GLFI0xgbkGDxcApcQAEKbVmSUS5kWhowgSP72DU35e751bLlA063PAXC1WUVlBUYNsenOwD2ioYlHjlXvKME9u1mwbzg2zFQqi693tNtYdA6clfCzcqo+uKl5WtD9zoCY6FUGAwnjaNIOVV5r7bHsooHbhkDQIhQTJXt+Uz1W79N6xwnRv2wRXk71XL6bsbdyJjdKEmtqr5d76LEcc+5pUdu3pRMgaSQ6WMkuzl4vV7gla/PECoujVmlmeDJCJqgswJBHyd44Egc8LlIs5cktRmfluHIMx14iU978vAlmCIkYNUyHQ==212FD3x19z9sWBHDJACbC00B75E')
+access_token_ = os.getenv('TDAMERITRADE_ACCESS_TOKEN', default='tN6d5djHKCAwUtcwV576bKXuY1fUNwaXZmpuUG6TvkWKlHqkhdnfsqURh0Tp5MNlzfeef+bR6Qd1KBz/juv8MdKJrVawhYLn5a0+cxcwDhsYzGSdhkARLyM4AOjr/maDwwmVICfgx2KNuzPc2ND48qsxU+m9d+dC+aGuRxda6TViRtXtqOJxtsdNumYL6bpVIcfdx+Hy/KY6lQNyfYrcJBMhpD9sjK/edbrHiLF5uxPPfAIcW28hn95LMl2VdWo2SEPKF9ZlX5jM0ycvSQHRmUpqSLmyLDS9LHiJ0J2YqYjp6NOHDjfojCfZEq6Q94N59QVs3DN6b5oA4AOpMKANkcRn8SFyLPO0e7Bu0/GhNGXoxZWwLxKcwjN1ELagHqvhNswyGG1NonbGsVEfO+vnbYRfyBhHgmcJq498BaYhY+x+SVkwPgP1ezzslrbCv6M2/7chqhutrZGAm9M8+kmfcmSqZi0WBgMYZ4kn3KHtxmlje2Y+hRyXBxiWV6u0W2v9kyM0K0stv2u6h/vCrzDSFJGHZ8NkNFts3TcmJ3CYqPs/7M/po100MQuG4LYrgoVi/JHHvlp60evaR2ref3eD9N6ec3mIFbDLs2dFG3pXkj6JwrviN29ZWJAK8Qzb6G/+TzGOTPuHTm6ivotnjUJ+vi6E+AuaeQgufbvEejKOIFqbMowv3Cq9CqTHbtTsxzm5po3iZNiYhLmK/KOchQHh2zw8uIjjzQr2iYGH3Nz7YMLOnpqjRExnHpnMsV5RYvOvacdqYizwTuXsaZK8kkcTV0FGWJFHd7YV6cOcmrJN/qwenmcJOF87NB8leyGyWi6NAGf+bkyNYMSr3eglzcqZzPmEOMO6oAb7pcglhcLOFZjgaipzfWV8e7bVNRFpEmRKUVQeRm7ZO+ajv8Pp7fXg876X6jiyQ56N3wr+QbUPWL+dazSZRV7R0nYpdIVyaSLvTDyanlZMhtJfgNdLDHp+XQLB0xCWoaMcfwdalUMQpWbgo+4/mEicm/swazEsAltgyaecX3OGWyfNPUEcGg5ZAp6im7RHTqEAu0yvpbOK5cRSDGgRwpl1LO+rA7aKOr8QN/n0VkaUT8BMBGLv7f2Fc0tOa5oI+g5mE/q1K0ntqo70CqpYlOd3lw==212FD3x19z9sWBHDJACbC00B75E')
 tc = td.TDClient(access_token=access_token_, accountIds=[account_id_])
 MY_SECRET = os.getenv('TDAMERITRADE_ACCOUNT_ID', default='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImVsdG91Y2hAZ21haWwuY29tIiwiaWF0IjoxNTkwMjUxMDU2LCJleHAiOjc4OTc0NTEwNTZ9.vQtvoFRLaTbAe935CRZHPr-gjalbVAuCYXbv7GgE_f4')
+
+import time
+import asyncio
+from threading import Thread
+
+# async def cor1(jsonData):
+#     texto = jsonData["texto"]
+#     print("texto", texto)
+#     print(f"cor{texto} start")
+#     for i in range(10):
+#         await asyncio.sleep(4.5)
+#         print("cor1", i)
+
+async def do_some_work(x):
+    print("Waiting " + str(x))
+    for i in range(10):
+        await asyncio.sleep(x)
+        print("cor1", i)
+
+def async_method():
+
+    loop = asyncio.get_event_loop()
+    #loop.run_until_complete(do_some_work(5))
+
+    tasks = [asyncio.ensure_future(do_some_work(2)), 
+            asyncio.ensure_future(do_some_work(5))]
+
+    loop.run_until_complete(asyncio.gather(*tasks))
 
 def history_price(jsonData):
 
@@ -206,6 +234,26 @@ def T_create_order(jsonData):
     orde = tc.orders(account_id_, jsonData)
     print(orde)
     return orde
+
+def place_order(jsonData):
+
+    url = "https://api.tdameritrade.com/v1/accounts/{}/orders".format(account_id_)
+
+    payload = json.dumps(jsonData)
+    print(payload)
+    headers = {
+    'Authorization': 'Bearer {}'.format(access_token_),
+    'Content-Type': 'application/json'
+    }
+
+    response = requests.request("POST", url, headers=headers, data = payload)
+
+    print(response.text.encode('utf8'))
+
+    result = response.json()
+
+    return result
+
 
 def account_balance(jsonData):
     positions = jsonData["positions"]
