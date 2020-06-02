@@ -4,6 +4,7 @@ from flask_restful import Resource, Api
 from flask import request
 
 import Development_TD
+import Development_TD as DD
 import Demo
 
 import json
@@ -26,6 +27,10 @@ def after_request(response):
 class HelloWorld(Resource):
     def get(self):
         return {'hello': 'world'}
+
+class test_(Resource):
+    def get(self):
+        return DD.C_TDameritrade().test()
 
 class demo_price_(Resource):
     def get(self):
@@ -113,9 +118,9 @@ class CO_sell_trailing_stop_(Resource):
 
 class access_token_(Resource):
     def post(self):
-        data = request.get_json()
+        #data = request.get_json()
         #return test.get_all_prices()
-        return Development_TD.access_token(data)
+        return Development_TD.access_token()
         #return json.loads(json.dumps(result, default=json_serial))
 
 class account_balance_(Resource):
@@ -160,6 +165,13 @@ class manual_history_price_(Resource):
         return Development_TD.manual_history_price()
         #return json.loads(json.dumps(result, default=json_serial))
 
+class history_price_by_data_(Resource):
+    def get(self):
+        data = request.get_json()
+        #return test.get_all_prices()
+        return Development_TD.history_price_by_data(data)
+        #return json.loads(json.dumps(result, default=json_serial))
+
 class place_order_(Resource):
     def post(self):
         data = request.get_json()
@@ -175,6 +187,7 @@ class async_method_(Resource):
         #return json.loads(json.dumps(result, default=json_serial))
 
 api.add_resource(HelloWorld, '/test')
+api.add_resource(test_, '/test2')
 api.add_resource(demo_price_, '/demo_price')
 api.add_resource(create_save_order_, '/create_save_order')
 api.add_resource(get_order_, '/get_order')
@@ -191,6 +204,7 @@ api.add_resource(account_balance_, '/account_balance')
 api.add_resource(indicator_, '/indicator')
 api.add_resource(loop_indicator_, '/loop_indicator')
 api.add_resource(history_price_, '/history_price')
+api.add_resource(history_price_by_data_, '/history_price_by_data')
 api.add_resource(manual_history_price_, '/manual_history_price')
 api.add_resource(place_order_, '/place_order')
 api.add_resource(async_method_, '/async_method')
