@@ -11,10 +11,12 @@ def get_token():
     f.close()
     return mensaje
 
+pToken = get_token()
+
 client_id_ = os.getenv('TDAMERITRADE_CLIENT_ID', default='FGCT7QNS3OXYT0R6DZQIDVIAYE3KFQA3')
 account_id_ = os.getenv('TDAMERITRADE_ACCOUNT_ID', default='493918836')
 refresh_token_ = os.getenv('TDAMERITRADE_REFRESH_TOKEN', default='il0eggPn3999znfXxkJKBwkLsawtEUb1Uub2Oma6FjaRY5+a/CVEPybOC/GAmTwDx9nOGI+qfZDKU1yit4qc56R9Keolj0zINrL0LdgFM3unmdwudyRCwL4YG33iqYxZcRY3FnRj8HwkVVrVUtoDsTfAbycsVY6qHpm1/MRrJganGTEzurt2Yu63/cRdRre2n7Yr+hZQWsyVivByHkM3zj6m8I50Hrk5TSznUDN1k/vZLkqpUNFRmHOtpDRddJN+oVEVdoqytRF0MGW+TMka+G9i1n/fiUZzytEUM7pC02aOd5cR/rAf/FwuN0MQeVHt4kd06t8C5kskq0cPzm4Z8g3zLYR0D3de4O3PQXjS9CLfRdoFbeD+j7FXb30yY703Zx+9/WjN02oUSMtblqrgvJn9SYpPtltUDILhbe3RcdOwWGrydz06I0WyHBN100MQuG4LYrgoVi/JHHvl/UhFrpcXcpEUIqNb7ESHW+9px9bnFVCAtr9oBbTpP0eJ8SUsUNI5OkH2/x+zq4v1fiqasYeeLbwhhuOcFXz8WYHPGdokcQ7oB8aoybS5Fg6V0QlJqhzx/KanbWcQKhTPSjytbykt5UKBKwgmC6lIPqaTmbHstHEGW0S3cyhha1dRkqHbc7XELj54I8obKHbhB76MoOtL6rjDExiuExhQh+8f6n7H/OkH7CzPbx8vXeYBmdUq7ejszxcNiJIE0QaDDH7qtsr8Ah4e6yTfxm2GaEuc1gNOcoVK/c29e8XGf2lrC8sLoR/9B+i+qRdoy4bRMtkadsdmn/YFsexzL46Ohk4cvA+yu/+FRq++H77Zi5d/1rQVWy5o4y1BpS/WYf3Q0uaHmmZzgznMB4qemzosMz2fVboi5MLaYX62fqtZIbe8WG+4xnNrQG8+0gc=212FD3x19z9sWBHDJACbC00B75E')
-access_token_ = os.getenv('TDAMERITRADE_ACCESS_TOKEN', default=get_token())
+access_token_ = os.getenv('TDAMERITRADE_ACCESS_TOKEN', default=pToken)
 tc = td.TDClient(access_token=access_token_, accountIds=[account_id_])
 MY_SECRET = os.getenv('TDAMERITRADE_ACCOUNT_ID', default='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImVsdG91Y2hAZ21haWwuY29tIiwiaWF0IjoxNTkwMjUxMDU2LCJleHAiOjc4OTc0NTEwNTZ9.vQtvoFRLaTbAe935CRZHPr-gjalbVAuCYXbv7GgE_f4')
 
@@ -48,10 +50,12 @@ MY_SECRET = os.getenv('TDAMERITRADE_ACCOUNT_ID', default='eyJhbGciOiJIUzI1NiIsIn
 
 def history_price(jsonData):
     bandera = True
-    print("fuera", bandera)
     
     while (bandera == True):
         print("dentro",bandera)
+        pToken = get_token()
+        print("pToken                     ",pToken)
+        bandera = False
 
         try:    
             symbol = jsonData['symbol']
@@ -66,9 +70,8 @@ def history_price(jsonData):
 
             payload = {}
             headers = {
-            'Authorization': 'Bearer {}'.format(access_token_)
+            'Authorization': 'Bearer {}'.format(pToken)
             }
-            print(access_token_)
 
             response = requests.request("GET", url, headers=headers, data = payload)
 
@@ -78,7 +81,6 @@ def history_price(jsonData):
             result = response.json() 
             result = result['candles']
 
-            bandera = False
 
             return result
         
@@ -87,8 +89,8 @@ def history_price(jsonData):
             if(response.status_code == 401):
                 bandera = True
                 access_token()
-                #return "Unauthorized, Error code 401"
-        time.sleep(60)
+                print("Unauthorized, Error code 401, procesing the new token")
+        time.sleep(10)
 
 
 def history_price_by_data(jsonData):
@@ -96,7 +98,11 @@ def history_price_by_data(jsonData):
     bandera = True
     
     while (bandera == True):
-        try:  
+
+        pToken = get_token()
+        bandera = False
+
+        try:
 
             symbol = jsonData['symbol']
             periodType = jsonData['periodType']
@@ -110,7 +116,7 @@ def history_price_by_data(jsonData):
 
             payload = {}
             headers = {
-                'Authorization': 'Bearer {}'.format(access_token_)
+                'Authorization': 'Bearer {}'.format(pToken)
             }
 
             response = requests.request("GET", url, headers=headers, data = payload)
@@ -127,7 +133,9 @@ def history_price_by_data(jsonData):
             if(response.status_code == 401):
                 bandera = True
                 access_token()
+                print("Unauthorized, Error code 401, procesing the new token")
                 #return "Unauthorized, Error code 401"
+        time.sleep(10)
 
 def manual_indicator(history_price_candles, jsonData):
 
@@ -238,8 +246,7 @@ def loop_indicator(jsonData):
     list_price_coin = {}
     a1 = 0
     a2 = 0
-
-
+    timeout = 60.1
     while(bandera == True):
         if(cont < 2):
             #variable = indicator(jsonData)
@@ -248,11 +255,20 @@ def loop_indicator(jsonData):
 
             variable = manual_history_price(jsonData)
             print("indicator valor ", variable)
+            if(variable == None):
+                print("invalid indicate")
+                bandera = False
+                cont = 2
+                timeout = 1
+            elif(variable == 'coin after hours, Error code 413'):
+                bandera = False
+                cont = 2
+                timeout = 1
             list_price_coin.setdefault(cont, variable)
             print(cont)
             cont = cont + 1
-            print("list indicator", list_price_coin)
         else:
+            print("list indicator", list_price_coin)
             for x, v in list_price_coin.items():
                 if (x == 0):
                     a1 = v
@@ -304,7 +320,7 @@ def loop_indicator(jsonData):
             print(cont)
             print(list_price_coin)
             #bandera = False
-        time.sleep(60.1)
+        time.sleep(timeout)
 
 
 
@@ -345,26 +361,6 @@ def access_token():
     f.write(b1)
     f.close()
 
-# def access_token():
-#     resp_token = requests.post('https://api.tdameritrade.com/v1/oauth2/token',
-#                          headers={'Content-Type': 'application/x-www-form-urlencoded'},
-#                          data={'grant_type': 'refresh_token',
-#                                'refresh_token': refresh_token_,
-#                                'client_id': client_id_})
-#     print("resp_token", resp_token)
-#     if resp_token.status_code != 200:
-#         raise Exception('Could not authenticate!')
-#     f = open ('token_DB.txt','wb')
-#     s = resp_token["access_token"]
-#     print(s)
-#     print(type(s))
-#     b1 = bytes(s, encoding = 'utf-8')
-#     print(b1)
-#     print(type(b1))
-#     f.write(b1)
-#     f.close()
-#     return s
-
 
 #def authenticate():
 
@@ -391,14 +387,17 @@ def place_order(jsonData):
     bandera = True
     
     while (bandera == True):
-        try: 
+        pToken = get_token()
+        bandera = False
+
+        try:
 
             url = "https://api.tdameritrade.com/v1/accounts/{}/orders".format(account_id_)
 
             payload = json.dumps(jsonData)
             print(payload)
             headers = {
-            'Authorization': 'Bearer {}'.format(access_token_),
+            'Authorization': 'Bearer {}'.format(pToken),
             'Content-Type': 'application/json'
             }
 
@@ -414,17 +413,57 @@ def place_order(jsonData):
             if(response.status_code == 401):
                 bandera = True
                 access_token()
+                print("Unauthorized, Error code 401, procesing the new token")
                 #return "Unauthorized, Error code 401"
+        time.sleep(10)
 
 
+# def account_balance(jsonData):
+#     pToken = get_token()
+#     positions = jsonData["positions"]
+#     orders = jsonData["orders"]
+#     try:
+#         balance = tc.accounts(positions, orders)
+#         # print(balance.status_code)
+#         return balance
+#     except Exception as identifier:
+#         print(identifier)
+    
 def account_balance(jsonData):
-    positions = jsonData["positions"]
-    orders = jsonData["orders"]
 
-    balance = tc.accounts(positions, orders)
-    #return balance
-    #print(balance.status_code)
-    return balance
+    bandera = True
+    
+    while (bandera == True):
+        print("dentro",bandera)
+        pToken = get_token()
+        print("pToken                     ",pToken)
+        bandera = False
+
+        fields = jsonData['fields']
+
+        url = "https://api.tdameritrade.com/v1/accounts/{}?fields={}".format(account_id_, fields)
+
+        payload = {}
+        headers = {
+            'Authorization': 'Bearer {}'.format(pToken)
+        }
+
+        response = requests.request("GET", url, headers=headers, data = payload)
+
+        print("requests status account balance", response.status_code)
+
+        result = response.json()
+
+        print(result)
+
+        if(response.status_code == 401):
+            bandera = True
+            access_token()
+            print("Unauthorized, Error code 401, procesing the new token")
+            #return "Unauthorized, Error code 401"
+        else:
+            return result
+    time.sleep(10)
 
 
 class C_TDameritrade:
