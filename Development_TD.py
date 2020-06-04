@@ -4,6 +4,8 @@ import requests, os, json, random, time
 
 from models import data_indicator
 from flask_app import db
+import json
+import time
 
 def get_token():
     f = open ('token_DB.txt','r')
@@ -94,10 +96,11 @@ def history_price(jsonData):
 
 
 def history_price_by_data(jsonData):
-
     bandera = True
+    cont = 0
     
     while (bandera == True):
+        contX = 1
 
         pToken = get_token()
         bandera = False
@@ -105,12 +108,17 @@ def history_price_by_data(jsonData):
         try:
 
             symbol = jsonData['symbol']
+            apikey = client_id_
             periodType = jsonData['periodType']
+            period = jsonData['period']
             frequencyType = jsonData['frequencyType']
+            frequency = jsonData['frequency']
             startDate = jsonData['startDate']
             endDate = jsonData['endDate']
+            needExtendedHoursData = jsonData['needExtendedHoursData']
 
-            url = "https://api.tdameritrade.com/v1/marketdata/{}/pricehistory?periodType={}&frequencyType={}&startDate={}&endDate={}".format(symbol,periodType,frequencyType,startDate,endDate)
+            #url = "https://api.tdameritrade.com/v1/marketdata/{}/pricehistory?periodType={}&frequencyType={}&startDate={}&endDate={}".format(symbol,apikey,periodType,period,frequencyType,frequency,startDate,endDate,needExtendedHoursData)
+            url = "https://api.tdameritrade.com/v1/marketdata/{}/pricehistory?apikey={}&periodType={}&period={}&frequencyType={}&frequency={}&endDate={}&startDate={}&needExtendedHoursData={}%20".format(symbol,apikey,periodType,period,frequencyType,frequency,startDate,endDate,needExtendedHoursData)
 
             print(url)
 
@@ -124,10 +132,16 @@ def history_price_by_data(jsonData):
             #print(response.text.encode('utf8'))
             print("requests status history price by data", response.status_code)
 
-            result = response.json() 
-            result = result['candles']
+            result = response.json()
 
-            return result
+            # while (cont < len(result['candles'])):
+            #     result['candles'][cont]["datetime"] = time.strftime('%m/%d/%Y %H:%M:%S',  time.gmtime(result['candles'][cont]["datetime"]/1000.))
+            #     cont = cont + 1
+
+            #print(result['candles'])
+
+            return result['candles']
+
         except:
 
             if(response.status_code == 401):
@@ -182,7 +196,7 @@ def manual_history_price(jsonData):
     history_price_candles = history_price_by_data(jsonData)
     #print(history_price_candles)
     valor = manual_indicator(history_price_candles, jsonData)
-    #print(valor)
+    print("valor del indicator saliente del manual_history_price", valor)
     return valor
 
 
@@ -246,37 +260,51 @@ def loop_indicator(jsonData):
     list_price_coin = {}
     a1 = 0
     a2 = 0
-    timeout = 60.1
+    timeout = 60.5
     while(bandera == True):
-        if(cont < 2):
+        if(cont < 3):
             #variable = indicator(jsonData)
+
+            # tDa= int(unix_time_millis(datetime.datetime.now())) - 3600000
+
+            # print(tDa)
+
+            jsonData["startDate"] = int(unix_time_millis(datetime.datetime.now())) - 3600000
+            sDate = jsonData["startDate"]
+            print("startDate ",cont, sDate)
             
             jsonData["endDate"] = int(unix_time_millis(datetime.datetime.now()))
+            eData = jsonData["endDate"]
+            print("endDate ",cont, eData)
+            print(jsonData)
 
-            variable = manual_history_price(jsonData)
-            print("indicator valor ", variable)
-            if(variable == None):
+            indicator = manual_history_price(jsonData)
+            print("indicator valor ", indicator)
+            if(indicator == None):
                 print("invalid indicate")
                 bandera = False
                 cont = 2
                 timeout = 1
-            elif(variable == 'coin after hours, Error code 413'):
+            elif(indicator == 'coin after hours, Error code 413'):
                 bandera = False
                 cont = 2
                 timeout = 1
-            list_price_coin.setdefault(cont, variable)
+            list_price_coin.setdefault(cont, indicator)
             print(cont)
             cont = cont + 1
         else:
             print("list indicator", list_price_coin)
             for x, v in list_price_coin.items():
                 if (x == 0):
-                    a1 = v
+                    HMA = v
                 if (x == 1):
-                    a2 = v
-            print("first indicator",a1 , "second indicator",a2)
-            if (a1 < a2):
+                    HMA1 = v
+                if (x == 2):
+                    HMA2 = v
+            print("first indicator",HMA , "second indicator",HMA1, "third indicator",HMA2)
+            if ( HMA1 < HMA2 and HMA > HMA1):
                 instruction = "buy"
+                print("buy")
                 jsonDataOrder =  {
                         "orderType": jsonData["orderType"],
                         "session": jsonData["session"],
@@ -294,8 +322,9 @@ def loop_indicator(jsonData):
                     ]
                 }
                 place_order(jsonDataOrder)
-            elif(a1 > a2):
+            elif(HMA1 > HMA2 and HMA < HMA1):
                 instruction = 'sell'
+                print("sell")
                 jsonDataOrder =  {
                         "orderType": jsonData["orderType"],
                         "session": jsonData["session"],
@@ -313,7 +342,7 @@ def loop_indicator(jsonData):
                     ]
                 }
                 place_order(jsonDataOrder)
-            elif(a1 == a2):
+            elif(HMA1 == HMA2 and HMA == HMA1 and HMA2 == HMA):
                 print("the indicators are the same")
             cont = 0
             list_price_coin = {}

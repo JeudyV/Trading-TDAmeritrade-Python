@@ -160,9 +160,9 @@ class manual_indicator_(Resource):
 
 class manual_history_price_(Resource):
     def get(self):
-        #data = request.get_json()
+        data = request.get_json()
         #return test.get_all_prices()
-        return Development_TD.manual_history_price()
+        return Development_TD.manual_history_price(data)
         #return json.loads(json.dumps(result, default=json_serial))
 
 class history_price_by_data_(Resource):
