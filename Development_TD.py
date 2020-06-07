@@ -7,6 +7,12 @@ from flask_app import db
 import json
 import time
 
+import pandas as pd
+import csv
+import datetime
+
+epoch = datetime.datetime.utcfromtimestamp(0)
+
 def get_token():
     f = open ('token_DB.txt','r')
     mensaje = f.read()
@@ -22,86 +28,12 @@ access_token_ = os.getenv('TDAMERITRADE_ACCESS_TOKEN', default=pToken)
 tc = td.TDClient(access_token=access_token_, accountIds=[account_id_])
 MY_SECRET = os.getenv('TDAMERITRADE_ACCOUNT_ID', default='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImVsdG91Y2hAZ21haWwuY29tIiwiaWF0IjoxNTkwMjUxMDU2LCJleHAiOjc4OTc0NTEwNTZ9.vQtvoFRLaTbAe935CRZHPr-gjalbVAuCYXbv7GgE_f4')
 
-# import time
-# import asyncio
-# from threading import Thread
-
-# # async def cor1(jsonData):
-# #     texto = jsonData["texto"]
-# #     print("texto", texto)
-# #     print(f"cor{texto} start")
-# #     for i in range(10):
-# #         await asyncio.sleep(4.5)
-# #         print("cor1", i)
-
-# async def do_some_work(x):
-#     print("Waiting " + str(x))
-#     for i in range(10):
-#         await asyncio.sleep(x)
-#         print("cor1", i)
-
-# async def async_method():
-
-#     loop = asyncio.get_event_loop()
-#     #loop.run_until_complete(do_some_work(5))
-
-#     tasks = [asyncio.ensure_future(do_some_work(2)), 
-#             asyncio.ensure_future(do_some_work(5))]
-
-#     loop.run_until_complete(asyncio.gather(*tasks))
-
-def history_price(jsonData):
-    bandera = True
-    
-    while (bandera == True):
-        print("dentro",bandera)
-        pToken = get_token()
-        print("pToken                     ",pToken)
-        bandera = False
-
-        try:    
-            symbol = jsonData['symbol']
-            periodType = jsonData['periodType']
-            period = jsonData['period']
-            frequencyType = jsonData['frequencyType']
-            frequency = jsonData['frequency']
-
-            print(symbol)
-
-            url = "https://api.tdameritrade.com/v1/marketdata/{}/pricehistory?periodType={}&period={}&frequencyType={}&frequency={}".format(symbol,periodType,period,frequencyType,frequency)
-
-            payload = {}
-            headers = {
-            'Authorization': 'Bearer {}'.format(pToken)
-            }
-
-            response = requests.request("GET", url, headers=headers, data = payload)
-
-            #print(response.text.encode('utf8'))
-            print("requests status history price", response.status_code)
-
-            result = response.json() 
-            result = result['candles']
-
-
-            return result
-        
-        except:
-
-            if(response.status_code == 401):
-                bandera = True
-                access_token()
-                print("Unauthorized, Error code 401, procesing the new token")
-        time.sleep(10)
-
 
 def history_price_by_data(jsonData):
     bandera = True
     cont = 0
     
     while (bandera == True):
-        contX = 1
-
         pToken = get_token()
         bandera = False
 
@@ -117,10 +49,7 @@ def history_price_by_data(jsonData):
             endDate = jsonData['endDate']
             needExtendedHoursData = jsonData['needExtendedHoursData']
 
-            #url = "https://api.tdameritrade.com/v1/marketdata/{}/pricehistory?periodType={}&frequencyType={}&startDate={}&endDate={}".format(symbol,apikey,periodType,period,frequencyType,frequency,startDate,endDate,needExtendedHoursData)
             url = "https://api.tdameritrade.com/v1/marketdata/{}/pricehistory?apikey={}&periodType={}&period={}&frequencyType={}&frequency={}&endDate={}&startDate={}&needExtendedHoursData={}%20".format(symbol,apikey,periodType,period,frequencyType,frequency,startDate,endDate,needExtendedHoursData)
-
-            print(url)
 
             payload = {}
             headers = {
@@ -128,8 +57,6 @@ def history_price_by_data(jsonData):
             }
 
             response = requests.request("GET", url, headers=headers, data = payload)
-
-            #print(response.text.encode('utf8'))
             print("requests status history price by data", response.status_code)
 
             result = response.json()
@@ -138,28 +65,54 @@ def history_price_by_data(jsonData):
             #     result['candles'][cont]["datetime"] = time.strftime('%m/%d/%Y %H:%M:%S',  time.gmtime(result['candles'][cont]["datetime"]/1000.))
             #     cont = cont + 1
 
-            #print(result['candles'])
-
-            return result['candles']
+            return result
 
         except:
 
-            if(response.status_code == 401):
+            if(response.status_code == 400):
+                print('dd')
+            elif(response.status_code == 401):
                 bandera = True
+                print("Unauthorized Token, Error code 401, procesing the new token")
                 access_token()
-                print("Unauthorized, Error code 401, procesing the new token")
-                #return "Unauthorized, Error code 401"
-        time.sleep(10)
+                
+                
+
+def history_by_min(jsonData):
+    bandera = 0
+    while (bandera < 30):
+        print("history by minute ",bandera)
+        jsonData["startDate"] = int(unix_time_millis(datetime.datetime.now())) - 3600000
+        sDate = jsonData["startDate"]
+        print("startDate ",bandera, time.strftime('%m/%d/%Y %H:%M:%S',  time.gmtime(sDate/1000.)))
+            
+        jsonData["endDate"] = int(unix_time_millis(datetime.datetime.now()))
+        eData = jsonData["endDate"]
+        print("endDate ",bandera, time.strftime('%m/%d/%Y %H:%M:%S',  time.gmtime(eData/1000.)))
+        
+        history_price_candles = history_price_by_data(jsonData)
+        print(history_price_candles)
+        valor = manual_indicator(history_price_candles, jsonData)
+        print("valor del indicator saliente del manual_history_price", valor)
+
+        bandera = bandera + 1
+        time.sleep(60.1)
+
 
 def manual_indicator(history_price_candles, jsonData):
+    cont = 0
+    import calendar
 
     try:
 
+        # while (cont < len(jsonData['candles'])):
+        #         jsonData['candles'][cont]["datetime"] = calendar.timegm(time.strptime(jsonData["datetime"], '%Y-%m-%d %H:%M:%S'))
+        #         cont = cont + 1
+
         # Get candles from your own source
-        candles = history_price_candles; # Candles in json
+        candles = history_price_candles['candles']; # Candles in json
 
         # Define indicator
-        #indicator = "rsi"
         indicator = jsonData["indicator"]
 
         # Define endpoint
@@ -181,11 +134,11 @@ def manual_indicator(history_price_candles, jsonData):
         result = response.json()
 
         # Print result
-        #print(result)
+        result = result['value']
 
-        print(result)
+        raise Exception
 
-        return result['value']
+        return result
 
     except:
 
@@ -200,55 +153,6 @@ def manual_history_price(jsonData):
     return valor
 
 
-def indicator(jsonData):
-    # Define indicator
-    #indicator = "hma"
-    indicator = jsonData["indicator"]
-    
-    # Define endpoint 
-    endpoint = f"https://ta.taapi.io/{indicator}"
-    #MY_SECRET = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImVsdG91Y2hAZ21haWwuY29tIiwiaWF0IjoxNTkwMjUxMDU2LCJleHAiOjc4OTc0NTEwNTZ9.vQtvoFRLaTbAe935CRZHPr-gjalbVAuCYXbv7GgE_f4'
-    
-    # Define a parameters dict for the parameters to be sent to the API 
-    # parameters = {
-    #     'secret': MY_SECRET,
-    #     'exchange': 'binance',
-    #     'symbol': 'BTC/USDT',
-    #     'interval': '1m',
-    #     'period' : 8
-    #     } 
-
-    parameters = {
-        'secret': MY_SECRET,
-        'exchange': jsonData["exchange"],
-        'symbol': jsonData["symbol"],
-        'interval': jsonData["interval"],
-        'period' : jsonData["period"]
-        } 
-    
-    # Send get request and save the response as response object 
-    response = requests.get(url = endpoint, params = parameters)
-
-    #response.status_code
-    print(response.status_code)
-    #print(response.text)
-    
-    # Extract data in json format 
-    result = response.json() 
-
-    # Print result
-    for x, v in result.items():
-        result = v
-
-    return result
-
-
-
-
-import datetime
-
-epoch = datetime.datetime.utcfromtimestamp(0)
-
 def unix_time_millis(dt):
     return (dt - epoch).total_seconds() * 1000.0
 
@@ -258,8 +162,6 @@ def loop_indicator(jsonData):
     cont = 0
     contador = 0
     list_price_coin = {}
-    a1 = 0
-    a2 = 0
     timeout = 60.5
     while(bandera == True):
         if(cont < 3):
@@ -269,14 +171,14 @@ def loop_indicator(jsonData):
 
             # print(tDa)
 
-            jsonData["startDate"] = int(unix_time_millis(datetime.datetime.now())) - 3600000
-            sDate = jsonData["startDate"]
-            print("startDate ",cont, sDate)
+            # jsonData["startDate"] = int(unix_time_millis(datetime.datetime.now())) - 3600000
+            # sDate = jsonData["startDate"]
+            # print("startDate ",cont, sDate)
             
-            jsonData["endDate"] = int(unix_time_millis(datetime.datetime.now()))
-            eData = jsonData["endDate"]
-            print("endDate ",cont, eData)
-            print(jsonData)
+            # jsonData["endDate"] = int(unix_time_millis(datetime.datetime.now()))
+            # eData = jsonData["endDate"]
+            # print("endDate ",cont, eData)
+            # print(jsonData)
 
             indicator = manual_history_price(jsonData)
             print("indicator valor ", indicator)
@@ -305,48 +207,48 @@ def loop_indicator(jsonData):
             if ( HMA1 < HMA2 and HMA > HMA1):
                 instruction = "buy"
                 print("buy")
-                jsonDataOrder =  {
-                        "orderType": jsonData["orderType"],
-                        "session": jsonData["session"],
-                        "duration": jsonData["duration"],
-                        "orderStrategyType": jsonData["orderStrategyType"],
-                        "orderLegCollection": [
-                            {
-                            "instruction": instruction,
-                            "quantity": jsonData["quantity"],
-                            "instrument": {
-                                "symbol": jsonData["symbol"],
-                                "assetType": jsonData["assetType"]
-                            }
-                        }
-                    ]
-                }
-                place_order(jsonDataOrder)
+                # jsonDataOrder =  {
+                #         "orderType": jsonData["orderType"],
+                #         "session": jsonData["session"],
+                #         "duration": jsonData["duration"],
+                #         "orderStrategyType": jsonData["orderStrategyType"],
+                #         "orderLegCollection": [
+                #             {
+                #             "instruction": instruction,
+                #             "quantity": jsonData["quantity"],
+                #             "instrument": {
+                #                 "symbol": jsonData["symbol"],
+                #                 "assetType": jsonData["assetType"]
+                #             }
+                #         }
+                #     ]
+                # }
+                # place_order(jsonDataOrder)
             elif(HMA1 > HMA2 and HMA < HMA1):
                 instruction = 'sell'
                 print("sell")
-                jsonDataOrder =  {
-                        "orderType": jsonData["orderType"],
-                        "session": jsonData["session"],
-                        "duration": jsonData["duration"],
-                        "orderStrategyType": jsonData["orderStrategyType"],
-                        "orderLegCollection": [
-                            {
-                            "instruction": instruction,
-                            "quantity": jsonData["quantity"],
-                            "instrument": {
-                                "symbol": jsonData["symbol"],
-                                "assetType": jsonData["assetType"]
-                            }
-                        }
-                    ]
-                }
-                place_order(jsonDataOrder)
+                # jsonDataOrder =  {
+                #         "orderType": jsonData["orderType"],
+                #         "session": jsonData["session"],
+                #         "duration": jsonData["duration"],
+                #         "orderStrategyType": jsonData["orderStrategyType"],
+                #         "orderLegCollection": [
+                #             {
+                #             "instruction": instruction,
+                #             "quantity": jsonData["quantity"],
+                #             "instrument": {
+                #                 "symbol": jsonData["symbol"],
+                #                 "assetType": jsonData["assetType"]
+                #             }
+                #         }
+                #     ]
+                # }
+                # place_order(jsonDataOrder)
             elif(HMA1 == HMA2 and HMA == HMA1 and HMA2 == HMA):
                 print("the indicators are the same")
             cont = 0
             list_price_coin = {}
-            print(cont)
+            #print(cont)
             print(list_price_coin)
             #bandera = False
         time.sleep(timeout)
@@ -376,40 +278,13 @@ def access_token():
                                'client_id': client_id_})
     if resp_token.status_code != 200:
         raise Exception('Could not authenticate!')
-    print("print ",resp_token)
-    print("print.json() ",resp_token.json())
     token = resp_token.json()
-    print("json ",token["access_token"])
     f = open ('token_DB.txt','wb')
     s = token["access_token"]
-    print(s)
-    print(type(s))
     b1 = bytes(s, encoding = 'utf-8')
-    print(b1)
-    print(type(b1))
     f.write(b1)
     f.close()
 
-
-#def authenticate():
-
-def process_random(jsonData):
-    option_random = random.randint(0, 2)  
-    bandera = True
-    while(bandera == True):
-        print(option_random)
-        if(option_random == 0):
-            print("0")
-        elif(option_random == 1):
-            print("1")
-        elif(option_random == 2):
-            print("2")
-
-
-def T_create_order(jsonData):
-    orde = tc.orders(account_id_, jsonData)
-    print(orde)
-    return orde
 
 def place_order(jsonData):
 
@@ -445,27 +320,15 @@ def place_order(jsonData):
                 print("Unauthorized, Error code 401, procesing the new token")
                 #return "Unauthorized, Error code 401"
         time.sleep(10)
-
-
-# def account_balance(jsonData):
-#     pToken = get_token()
-#     positions = jsonData["positions"]
-#     orders = jsonData["orders"]
-#     try:
-#         balance = tc.accounts(positions, orders)
-#         # print(balance.status_code)
-#         return balance
-#     except Exception as identifier:
-#         print(identifier)
+    
     
 def account_balance(jsonData):
 
     bandera = True
     
     while (bandera == True):
-        print("dentro",bandera)
+
         pToken = get_token()
-        print("pToken                     ",pToken)
         bandera = False
 
         fields = jsonData['fields']
@@ -483,16 +346,18 @@ def account_balance(jsonData):
 
         result = response.json()
 
-        print(result)
+        return result
 
-        if(response.status_code == 401):
+        if(response.status_code == 400):
+            raise "Token validation error, Error code 400"
+        elif(response.status_code == 401):
             bandera = True
+            print("Unauthorized Token, Error code 401, procesing the new token")
             access_token()
-            print("Unauthorized, Error code 401, procesing the new token")
-            #return "Unauthorized, Error code 401"
-        else:
-            return result
-    time.sleep(10)
+        elif(response.status_code == 403):
+            raise "unauthorized user, Error code 403"
+        elif(response.status_code == 500):
+            raise "Unexpected server error, Error code 500"
 
 
 class C_TDameritrade:

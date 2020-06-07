@@ -151,11 +151,11 @@ class history_price_(Resource):
         return Development_TD.history_price(data)
         #return json.loads(json.dumps(result, default=json_serial))
 
-class manual_indicator_(Resource):
+class history_by_min_(Resource):
     def get(self):
         data = request.get_json()
         #return test.get_all_prices()
-        return Development_TD.manual_indicator(data)
+        return Development_TD.history_by_min(data)
         #return json.loads(json.dumps(result, default=json_serial))
 
 class manual_history_price_(Resource):
@@ -202,6 +202,7 @@ api.add_resource(CO_sell_trailing_stop_, '/CO_sell_trailing_stop')
 api.add_resource(access_token_, '/access_token')
 api.add_resource(account_balance_, '/account_balance')
 api.add_resource(indicator_, '/indicator')
+api.add_resource(history_by_min_, '/history_by_min')
 api.add_resource(loop_indicator_, '/loop_indicator')
 api.add_resource(history_price_, '/history_price')
 api.add_resource(history_price_by_data_, '/history_price_by_data')
