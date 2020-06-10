@@ -29,6 +29,30 @@ tc = td.TDClient(access_token=access_token_, accountIds=[account_id_])
 MY_SECRET = os.getenv('TDAMERITRADE_ACCOUNT_ID', default='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImVsdG91Y2hAZ21haWwuY29tIiwiaWF0IjoxNTkwMjUxMDU2LCJleHAiOjc4OTc0NTEwNTZ9.vQtvoFRLaTbAe935CRZHPr-gjalbVAuCYXbv7GgE_f4')
 
 
+def watchlist_for_account():
+
+    url = f"https://api.tdameritrade.com/v1/accounts/{account_id_}/watchlists"
+
+    payload = {}
+    headers = {
+        'Authorization': 'Bearer {}'.format(pToken)
+    }
+
+    response = requests.request("GET", url, headers=headers, data = payload)
+
+    print("requests status watchlist for account", response.status_code)
+
+    # Extract data in json format
+    result = response.json()
+
+    # if(response.status_code == 401):
+    #     print("Unauthorized, Error code 401, procesing the new token")
+    #     bandera = True
+    #     access_token()
+    # else:
+    return result
+
+
 def history_price_by_data(jsonData):
     bandera = True
     cont = 0
@@ -37,50 +61,46 @@ def history_price_by_data(jsonData):
         pToken = get_token()
         bandera = False
 
-        try:
+        symbol = jsonData['symbol']
+        apikey = client_id_
+        periodType = jsonData['periodType']
+        period = jsonData['period']
+        frequencyType = jsonData['frequencyType']
+        frequency = jsonData['frequency']
+        startDate = jsonData['startDate']
+        endDate = jsonData['endDate']
+        needExtendedHoursData = jsonData['needExtendedHoursData']
 
-            symbol = jsonData['symbol']
-            apikey = client_id_
-            periodType = jsonData['periodType']
-            period = jsonData['period']
-            frequencyType = jsonData['frequencyType']
-            frequency = jsonData['frequency']
-            startDate = jsonData['startDate']
-            endDate = jsonData['endDate']
-            needExtendedHoursData = jsonData['needExtendedHoursData']
+        url = "https://api.tdameritrade.com/v1/marketdata/{}/pricehistory?apikey={}&periodType={}&period={}&frequencyType={}&frequency={}&endDate={}&startDate={}&needExtendedHoursData={}%20".format(symbol,apikey,periodType,period,frequencyType,frequency,startDate,endDate,needExtendedHoursData)
 
-            url = "https://api.tdameritrade.com/v1/marketdata/{}/pricehistory?apikey={}&periodType={}&period={}&frequencyType={}&frequency={}&endDate={}&startDate={}&needExtendedHoursData={}%20".format(symbol,apikey,periodType,period,frequencyType,frequency,startDate,endDate,needExtendedHoursData)
+        payload = {}
+        headers = {
+            'Authorization': 'Bearer {}'.format(pToken)
+        }
 
-            payload = {}
-            headers = {
-                'Authorization': 'Bearer {}'.format(pToken)
-            }
+        response = requests.request("GET", url, headers=headers, data = payload)
+        print("requests status history price by data", response.status_code)
 
-            response = requests.request("GET", url, headers=headers, data = payload)
-            print("requests status history price by data", response.status_code)
+        result = response.json()
 
-            result = response.json()
+        # while (cont < len(result['candles'])):
+        #     result['candles'][cont]["datetime"] = time.strftime('%m/%d/%Y %H:%M:%S',  time.gmtime(result['candles'][cont]["datetime"]/1000.))
+        #     cont = cont + 1
 
-            # while (cont < len(result['candles'])):
-            #     result['candles'][cont]["datetime"] = time.strftime('%m/%d/%Y %H:%M:%S',  time.gmtime(result['candles'][cont]["datetime"]/1000.))
-            #     cont = cont + 1
+        #raise Exception('Could not authenticate!')
 
+
+        if(response.status_code == 401):
+            bandera = True
+            print("Unauthorized Token, Error code 401, procesing the new token")
+            access_token()
+        else:
             return result
-
-        except:
-
-            if(response.status_code == 400):
-                print('dd')
-            elif(response.status_code == 401):
-                bandera = True
-                print("Unauthorized Token, Error code 401, procesing the new token")
-                access_token()
-                
                 
 
 def history_by_min(jsonData):
     bandera = 0
-    while (bandera < 30):
+    while (bandera < 10):
         print("history by minute ",bandera)
         jsonData["startDate"] = int(unix_time_millis(datetime.datetime.now())) - 3600000
         sDate = jsonData["startDate"]
@@ -91,12 +111,13 @@ def history_by_min(jsonData):
         print("endDate ",bandera, time.strftime('%m/%d/%Y %H:%M:%S',  time.gmtime(eData/1000.)))
         
         history_price_candles = history_price_by_data(jsonData)
-        print(history_price_candles)
-        valor = manual_indicator(history_price_candles, jsonData)
-        print("valor del indicator saliente del manual_history_price", valor)
+        indicator = manual_indicator(history_price_candles, jsonData)
+        print("valor del indicator saliente del manual_history_price", indicator)
 
         bandera = bandera + 1
         time.sleep(60.1)
+
+        return indicator
 
 
 def manual_indicator(history_price_candles, jsonData):
@@ -106,8 +127,8 @@ def manual_indicator(history_price_candles, jsonData):
     try:
 
         # while (cont < len(jsonData['candles'])):
-        #         jsonData['candles'][cont]["datetime"] = calendar.timegm(time.strptime(jsonData["datetime"], '%Y-%m-%d %H:%M:%S'))
-        #         cont = cont + 1
+        #     jsonData['candles'][cont]["datetime"] = datetime.datetime.fromtimestamp(jsonData["datetime"]).strftime('%Y-%m-%d %H:%M:%S.%f')
+        #     cont = cont + 1
 
         # Get candles from your own source
         candles = history_price_candles['candles']; # Candles in json
@@ -136,14 +157,13 @@ def manual_indicator(history_price_candles, jsonData):
         # Print result
         result = result['value']
 
-        raise Exception
-
         return result
 
     except:
 
         if(response.status_code == 413):
             return "coin after hours, Error code 413"
+
 
 def manual_history_price(jsonData):
     history_price_candles = history_price_by_data(jsonData)
@@ -160,6 +180,7 @@ def unix_time_millis(dt):
 def loop_indicator(jsonData):
     bandera = True
     cont = 0
+    contv = 0
     contador = 0
     list_price_coin = {}
     timeout = 60.5
@@ -180,7 +201,8 @@ def loop_indicator(jsonData):
             # print("endDate ",cont, eData)
             # print(jsonData)
 
-            indicator = manual_history_price(jsonData)
+            #indicator = manual_history_price(jsonData)
+            indicator = history_by_min(jsonData)
             print("indicator valor ", indicator)
             if(indicator == None):
                 print("invalid indicate")
@@ -194,6 +216,11 @@ def loop_indicator(jsonData):
             list_price_coin.setdefault(cont, indicator)
             print(cont)
             cont = cont + 1
+            if(contv < 36):
+                contv = contv + 1
+            else:
+                bandera = False
+            print("contv ",contv)
         else:
             print("list indicator", list_price_coin)
             for x, v in list_price_coin.items():
@@ -203,7 +230,7 @@ def loop_indicator(jsonData):
                     HMA1 = v
                 if (x == 2):
                     HMA2 = v
-            print("first indicator",HMA , "second indicator",HMA1, "third indicator",HMA2)
+            print("HMA ",HMA , "HMA1 ",HMA1, "HMA2 ",HMA2)
             if ( HMA1 < HMA2 and HMA > HMA1):
                 instruction = "buy"
                 print("buy")
@@ -254,22 +281,6 @@ def loop_indicator(jsonData):
         time.sleep(timeout)
 
 
-
-#def access_token(refresh_token, client_id):
-# def access_token():
-#     resp_token = requests.post('https://api.tdameritrade.com/v1/oauth2/token',
-#                          headers={'Content-Type': 'application/x-www-form-urlencoded'},
-#                          data={'grant_type': 'refresh_token',
-#                                'refresh_token': refresh_token_,
-#                                'client_id': client_id_})
-#     if resp_token.status_code != 200:
-#         raise Exception('Could not authenticate!')
-#     print("print ",resp_token)
-#     print("print.json() ",resp_token.json())
-#     token = resp_token.json()
-#     print("json ",token["access_token"])
-#     return token["access_token"]
-
 def access_token():
     resp_token = requests.post('https://api.tdameritrade.com/v1/oauth2/token',
                          headers={'Content-Type': 'application/x-www-form-urlencoded'},
@@ -294,32 +305,27 @@ def place_order(jsonData):
         pToken = get_token()
         bandera = False
 
-        try:
+        url = "https://api.tdameritrade.com/v1/accounts/{}/orders".format(account_id_)
 
-            url = "https://api.tdameritrade.com/v1/accounts/{}/orders".format(account_id_)
+        payload = json.dumps(jsonData)
+        print(payload)
+        headers = {
+        'Authorization': 'Bearer {}'.format(pToken),
+        'Content-Type': 'application/json'
+        }
 
-            payload = json.dumps(jsonData)
-            print(payload)
-            headers = {
-            'Authorization': 'Bearer {}'.format(pToken),
-            'Content-Type': 'application/json'
-            }
+        response = requests.request("POST", url, headers=headers, data = payload)
 
-            response = requests.request("POST", url, headers=headers, data = payload)
+        print(response.text.encode('utf8'))
 
-            print(response.text.encode('utf8'))
+        result = response.json()
 
-            result = response.json()
-
+        if(response.status_code == 401):
+            bandera = True
+            access_token()
+            print("Unauthorized, Error code 401, procesing the new token")
+        else:
             return result
-        except:
-
-            if(response.status_code == 401):
-                bandera = True
-                access_token()
-                print("Unauthorized, Error code 401, procesing the new token")
-                #return "Unauthorized, Error code 401"
-        time.sleep(10)
     
     
 def account_balance(jsonData):
@@ -346,8 +352,6 @@ def account_balance(jsonData):
 
         result = response.json()
 
-        return result
-
         if(response.status_code == 400):
             raise "Token validation error, Error code 400"
         elif(response.status_code == 401):
@@ -358,6 +362,8 @@ def account_balance(jsonData):
             raise "unauthorized user, Error code 403"
         elif(response.status_code == 500):
             raise "Unexpected server error, Error code 500"
+        else:
+            return result
 
 
 class C_TDameritrade:

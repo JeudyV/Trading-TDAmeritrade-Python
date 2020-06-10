@@ -179,11 +179,11 @@ class place_order_(Resource):
         return Development_TD.place_order(data)
         #return json.loads(json.dumps(result, default=json_serial))
 
-class async_method_(Resource):
+class watchlist_for_account_(Resource):
     def get(self):
         #data = request.get_json()
         #return test.get_all_prices()
-        return Development_TD.async_method()
+        return Development_TD.watchlist_for_account()
         #return json.loads(json.dumps(result, default=json_serial))
 
 api.add_resource(HelloWorld, '/test')
@@ -208,7 +208,8 @@ api.add_resource(history_price_, '/history_price')
 api.add_resource(history_price_by_data_, '/history_price_by_data')
 api.add_resource(manual_history_price_, '/manual_history_price')
 api.add_resource(place_order_, '/place_order')
-api.add_resource(async_method_, '/async_method')
+api.add_resource(watchlist_for_account_, '/watchlist_for_account')
 
 #if __name__ == '__main__':
-app.run(debug=True)
+#app.run(debug=True)
+app.run(threaded=True)
